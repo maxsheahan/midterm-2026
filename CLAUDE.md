@@ -5,7 +5,7 @@ Project instructions compiled for this repo (project: Midterm 2026 poll-weightin
 This repo is public, so project rulings live in the gitignored `CLAUDE.local.md` beside this file.
 
 ## How changes land
-- Owner: max. Remote: `blueandyellow44/midterm-2026`. Main branch: `main`.
+- Owner: max. Remote: `maxsheahan/midterm-2026`. Main branch: `main`.
 - How changes land (`max-pr`): Branch and pull request for every change; merge to main only on Max's word. Never push to main (branch protection is on).
 - Deploy: `npm run build:cloudflare && npm run deploy (scripts/deploy.mjs: clean tree required, verify-static.mjs gate, wrangler deploy, record in .deploys/, live byte-compare)` -> Cloudflare Worker election-weather on midtermundertow.com. Deploys happen only on Max's word, from main.
   - Verify after deploy: every live route byte-identical to .open-next/assets (deploy.mjs, rechecked up to three times)
@@ -53,14 +53,10 @@ Tests run on Vitest; a change to logic ships with a test that fails without it.
 
 ### Cloudflare (Pages / Workers / D1)
 
-- Vite builds to `dist/`. Point Pages at `dist/`, same publish directory as Netlify.
 - **Ship a served favicon with every deploy (2026-07-09, Max, recurring).** Put a real `/favicon.svg` in the served root, linked `type="image/svg+xml"` (plus a raster `.ico`/PNG fallback when tooling allows), and verify it returns 200 with `image/svg+xml` before declaring done. An inline `data:` URI favicon is unreliable in Chrome and ships a blank tab. Favicon is definition-of-done for any web surface, not optional polish.
 - **Static-assets deploys cache HTML; add a no-cache `_headers` or updates look stale (2026-07-09).** For a Workers/Pages static-assets project whose content changes, ship `public/_headers` with `/*` then `Cache-Control: no-cache` so HTML revalidates and deploys show immediately. A `?query` cache-bust does NOT clear the edge asset cache; the authoritative check that a deploy landed is a cache-busted `curl` of the server bytes (grep the changed string), not the browser (browser/edge cache lies). Burned ~20 deploys of the cohort hub chasing "it went dark again" that was pure stale cache.
 - **A per-path `_headers` rule is ADDED to the `/*` rule, never substituted for it (2026-07-31).** Workers Assets concatenates matching blocks per header name, so `/*` setting `Cache-Control: no-cache` plus `/favicon.svg` setting `public, max-age=86400` serves the self-contradicting `Cache-Control: no-cache, public, max-age=86400`. If one path needs a different value for a header, the wildcard must not set that header at all. Verify the served value with `curl -sI` after deploying; the file does not tell you what shipped.
-- Pages Functions bill as Workers requests. Do not make every route dynamic just because the framework allows it. Keep pages static where possible to control cost.
-- **A binding that works on Workers is not available on Pages Functions (2026-08-18, displaced from ROE 2026-08-19).** Pages supports only a documented subset (KV, R2, D1, Durable Objects, Service bindings); `send_email` is rejected at deploy with "Configuration file for Pages projects does not support". `wrangler pages dev` validates the CALL, `pages deploy` validates the CONFIG, so local success proves nothing about deployability. Check the Pages bindings list, not the product's Workers quickstart. Full story: [[Tasks/lessons|lessons.md]] 2026-08-18.
 - D1 is SQLite, accessed through **Drizzle** (schema file, generated types, `drizzle-kit` migrations) in every project that has been touched since June 2026. The old "raw and stringly-typed" state is history, corrected 2026-08-18. Any raw query still surviving in untouched code gets converted the next time a session changes that schema, per the trigger policy above. Validate inputs regardless; typed access removes the stringly-typed footgun, not the untrusted-input one.
-- Secrets via `wrangler secret` and the dashboard, never committed. Client-exposed vars still use the `VITE_` prefix at build time.
 - Workers AI, AI Gateway, and Vectorize are available on this account and are the intended differentiation surface for consulting work.
 <!-- END GENERATED -->
 
