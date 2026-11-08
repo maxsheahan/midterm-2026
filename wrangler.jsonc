@@ -2,7 +2,7 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "election-weather",
   // Max.sheahan@icloud.com's Account; a deploy to any other account refuses (wrangler-login skill rule 8, Max 2026-11-07).
-  \"account_id\": \"73b94d8e92209bdb6b522b18cfdc1122\",
+  "account_id": "73b94d8e92209bdb6b522b18cfdc1122",
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-10-25",
   "compatibility_flags": ["nodejs_compat"],
